@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BoidsCanvas</title>
+    <link rel="stylesheet" type="text/css" href="demo.css">
+  </head>
+  <body>
+    <div id="boids-canvas"></div>
+
+    <!-- ******  RESOURCES ****** -->
+    <!-- JQUERY -->
+    <!--<script type="text/javascript" src="js/dependencies/jquery-2.1.1.min.js"></script>-->
+    <!-- BOIDS -->
+    <script type="text/javascript" src="boids-canvas.js"></script>
+    <!-- INIT -->
+    <script type="text/javascript">
+      var canvasDiv = document.getElementById('boids-canvas');
+      var options = {
+        background: 'img/demo-bg.jpg',
+      };
+      var boidsCanvas = new BoidsCanvas(canvasDiv, options);
+    </script>
+  </body>
+</html>
