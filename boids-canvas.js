@@ -287,21 +287,21 @@ BoidsCanvas.prototype.init = function() {
     'position': 'relative'
   });
 
-  //TODO: add resize listener to canvas
+  // Add resize listener to canvas
+  window.addEventListener('resize', function () {
+    // Check if div has changed size
+    if (this.canvasDiv.offsetWidth === this.canvasDiv.size.width && this.canvasDiv.offsetHeight === this.canvasDiv.size.height) {
+      return false;
+    }
 
-  // Initialise boids
-  this.boids = [];
-  for(var i = 0; i < this.canvas.width * this.canvas.height / this.options.density; i++) {
-    var position = new Vector(Math.floor(Math.random()*(this.canvas.width+1)),
-                              Math.floor(Math.random()*(this.canvas.height+1)));
-    var max_velocity = 5;
-    var min_velocity = -5;
-    var velocity = new Vector(Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity),
-                              Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity));
-    var size = (this.options.mixedSizes) ? Math.floor(Math.random()*(3-1+1)+1) : 1;
-    var colourIdx = Math.floor(Math.random()*(this.options.boidColours.length-1+1));
-    this.boids.push(new Boid(this, position, velocity, size, this.options.boidColours[colourIdx]));
-  }
+    // Scale canvas
+    this.canvas.width = this.canvasDiv.size.width = this.canvasDiv.offsetWidth;
+    this.canvas.height = this.canvasDiv.size.height = this.canvasDiv.offsetHeight;
+
+    this.initialiseBoids();
+  }.bind(this));
+
+  this.initialiseBoids();
 
   // Mouse event listeners
   this.canvas.addEventListener('mousemove', function (e) {
@@ -314,6 +314,22 @@ BoidsCanvas.prototype.init = function() {
 
   // Update canvas
   requestAnimationFrame(this.update.bind(this));
+}
+
+// Initialise boids according to options
+BoidsCanvas.prototype.initialiseBoids = function() {
+  this.boids = [];
+  for(var i = 0; i < this.canvas.width * this.canvas.height / this.options.density; i++) {
+    var position = new Vector(Math.floor(Math.random()*(this.canvas.width+1)),
+                              Math.floor(Math.random()*(this.canvas.height+1)));
+    var max_velocity = 5;
+    var min_velocity = -5;
+    var velocity = new Vector(Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity),
+                              Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity));
+    var size = (this.options.mixedSizes) ? Math.floor(Math.random()*(3-1+1)+1) : 1;
+    var colourIdx = Math.floor(Math.random()*(this.options.boidColours.length-1+1));
+    this.boids.push(new Boid(this, position, velocity, size, this.options.boidColours[colourIdx]));
+  }
 }
 
 BoidsCanvas.prototype.update = function() {
