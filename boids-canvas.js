@@ -1,6 +1,49 @@
+// VECTOR HELPER CLASS
+var Vector = function(x, y) {
+  if(x === 'undefined') x = 0;
+  if(y === 'undefined') y = 0;
+  this.x = x;
+  this.y = y;
+}
+
+Vector.prototype.add = function(v) {
+  return new Vector(this.x + v.x, this.y + v.y);
+}
+Vector.prototype.sub = function(v) {
+  return new Vector(this.x - v.x, this.y - v.y);
+}
+Vector.prototype.mul = function(v) {
+  return new Vector(this.x * v.x, this.y * v.y);
+}
+Vector.prototype.div = function(v) {
+  return new Vector(this.x / v.x, this.y / v.y);
+}
+Vector.prototype.mag = function() {
+  return Math.sqrt((this.x * this.x) + (this.y * this.y));
+}
+Vector.prototype.normalise = function(v) {
+  var mag = this.mag();
+  return new Vector(this.x / mag, this.y / mag);
+}
+Vector.prototype.dist = function(v) {
+  return Math.sqrt((this.x - v.x)*(this.x - v.x) + (this.y - v.y)*(this.y - v.y));
+}
+Vector.prototype.limit = function(limit) {
+  var v;
+  if(this.mag() > limit) {
+    v = this.normalise().mul(new Vector(limit, limit));
+  } else {
+    v = this;
+  }
+  return v;
+}
+
+// INDIVIDUAL BOID CLASS
 var Boid = function(parent, position, velocity, colour) {
-  this.position = position;
-  this.velocity = velocity;
+  // Initialise the boid parameters
+  this.position = new Vector(position.x, position.y);
+  this.velocity = new Vector(velocity.x, velocity.y);
+  this.acceleration = new Vector(0, 0);
 
   // Check if valid colour
   if (!(/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i).test(colour)) {
@@ -20,92 +63,137 @@ Boid.prototype.draw = function () {
   this.parent.ctx.fill();
 };
 
+/* Update the boid positions according to Reynold's rules.
+** Called on every frame  */
 Boid.prototype.update = function () {
   var v1 = this.cohesion();
   var v2 = this.separation();
   var v3 = this.alignment();
-  var v4 = this.contain();
 
-  this.velocity.x += (v1.x + v2.x + v3.x + v4.x);
-  this.velocity.y += (v1.y + v2.y + v3.y + v4.y);
+  this.applyForce(v1);
+  this.applyForce(v2);
+  this.applyForce(v3);
+  this.velocity = this.velocity.add(this.acceleration).limit(this.parent.maxVelocity);
 
-  // Limit the velocity
-  var v_mag = Math.sqrt((this.velocity.x * this.velocity.x) + (this.velocity.y * this.velocity.y));
-  if(v_mag > this.parent.maxVelocity) {
-    this.velocity.x = (this.velocity.x / v_mag) * this.parent.maxVelocity;
-    this.velocity.y = (this.velocity.y / v_mag) * this.parent.maxVelocity;
-  }
-
-  this.position.x = this.position.x + this.velocity.x;
-  this.position.y = this.position.y + this.velocity.y;
+  this.position = this.position.add(this.velocity);
+  this.acceleration = this.acceleration.mul(new Vector(0, 0));
+  this.borders();
 }
 
-// BOIDS RULES
+// BOIDS FLOCKING RULES
+
+/* Cohesion rule: steer towards average position of local flockmates */
 Boid.prototype.cohesion = function () {
-  var center = { 'x': 0, 'y': 0};
+  var sum = new Vector(0, 0); // Average flockmate position
+  var count = 0;  // number of local flockmates
+
+  // For each boid close enough to be seen...
   for(var i = 0; i < this.parent.boids.length; i++) {
-    var diff_x = this.parent.boids[i].position.x - this.position.x;
-    var diff_y = this.parent.boids[i].position.y - this.position.y;
-    var diff = Math.sqrt((diff_x * diff_x) + (diff_y * diff_y));
-    if(this != this.parent.boids[i] && diff < this.parent.visibleRadius) {
-      center.x += this.parent.boids[i].position.x;
-      center.y += this.parent.boids[i].position.y;
+    var d = this.position.dist(this.parent.boids[i].position);
+    if(d > 0 && d < this.parent.visibleRadius) {
+      sum = sum.add(this.parent.boids[i].position);
+      count++;
     }
   }
-  center.x /= ((this.parent.boids.length - 1) * 100);
-  center.y /= ((this.parent.boids.length - 1) * 100);
-  return center;
+
+  if(count > 0) {
+    // Calculate average position and return the force required to steer towards it
+    sum = sum.div(new Vector(count, count));
+    sum = this.seek(sum);
+    return sum;
+  } else {
+    return new Vector(0, 0);
+  }
 }
 
+/* Separation rule: steer to avoid crowding local flockmates */
 Boid.prototype.separation = function () {
-  var c = { 'x': 0, 'y': 0};
+  var steer = new Vector(0, 0); // Average steer
+  var count = 0;  // number of flockmates considered "too close"
+
+  // For each boid which is too close, calculate a vector pointing
+  // away from it weighted by the distance to it
   for(var i = 0; i < this.parent.boids.length; i++) {
-    var diff_x = this.parent.boids[i].position.x - this.position.x;
-    var diff_y = this.parent.boids[i].position.y - this.position.y;
-    var diff = Math.sqrt((diff_x * diff_x) + (diff_y * diff_y));
-    if(this != this.parent.boids[i] && diff < this.parent.visibleRadius) {
-      //if(diff < 50) {
-        c.x -= diff_x;
-        c.y -= diff_y;
-      //}
+    var d = this.position.dist(this.parent.boids[i].position);
+    if(d > 0 && d < this.parent.separationDist) {
+      var diff = this.position.sub(this.parent.boids[i].position);
+      diff = diff.normalise();
+      diff = diff.div(new Vector(d, d));
+      steer = steer.add(diff);
+      count++;
     }
   }
-  return c;
+  // Calculate average
+  if(count > 0) {
+    steer = steer.div(new Vector(count, count));
+  }
+
+  // Steering = Desired - Velocity
+  if(steer.mag() > 0) {
+    steer = steer.normalise();
+    steer = steer.mul(new Vector(this.parent.maxVelocity, this.parent.maxVelocity));
+    steer = steer.sub(this.velocity);
+    steer = steer.limit(this.parent.maxForce);
+  }
+  return steer;
 }
 
+/* Alignment rule: steer toward average heading of local flockmates */
 Boid.prototype.alignment = function () {
-  var v = { 'x': 0, 'y': 0};
+  var sum = new Vector(0, 0); // Average velocity
+  var count = 0;  // number of local flockmates
+
+  // For each boid which is close enough to be seen
   for(var i = 0; i < this.parent.boids.length; i++) {
-    var diff_x = this.parent.boids[i].position.x - this.position.x;
-    var diff_y = this.parent.boids[i].position.y - this.position.y;
-    var diff = Math.sqrt((diff_x * diff_x) + (diff_y * diff_y));
-    if(this != this.parent.boids[i] && diff < this.parent.visibleRadius) {
-      v.x += this.velocity.x;
-      v.y += this.velocity.y;
+    var d = this.position.dist(this.parent.boids[i].position);
+    if(d > 0 && d < this.parent.visibleRadius) {
+      sum = sum.add(this.parent.boids[i].velocity);
+      count++;
     }
   }
-  v.x /= ((this.parent.boids.length - 1) * 8);
-  v.y /= ((this.parent.boids.length - 1) * 8);
-  return v;
+
+  if(count > 0) {
+    // Calculate average and limit
+    sum = sum.div(new Vector(count, count));
+    sum = sum.normalise();
+    sum = sum.mul(new Vector(this.parent.maxVelocity, this.parent.maxVelocity));
+
+    // Steering = Desired - Velocity
+    var steer = sum.sub(this.velocity);
+    steer = steer.limit(this.parent.maxForce);
+    return steer;
+  } else {
+    return new Vector(0, 0);
+  }
 }
 
-Boid.prototype.contain = function () {
-  var v = {'x': 0, 'y': 0};
-  var offset_speed = 100;
-  if(this.position.x < 0) {
-    v.x = offset_speed;
-  } else if(this.position.x > this.parent.canvas.width) {
-    v.x = -offset_speed;
-
-  }
-  if(this.position.y < 0) {
-    v.y = offset_speed;
-  } else if(this.position.y > this.parent.canvas.height) {
-    v.y = -offset_speed;
-  }
-  return v;
+// Implement torus boundaries
+Boid.prototype.borders = function() {
+  if(this.position.x < 0) this.position.x = this.parent.canvas.width;
+  if(this.position.y < 0) this.position.y = this.parent.canvas.height;
+  if(this.position.x > this.parent.canvas.width) this.position.x = 0;
+  if(this.position.y > this.parent.canvas.height) this.position.y = 0;
 }
 
+/* Calculate a force to apply to a boid to steer
+** it towards a target position */
+Boid.prototype.seek = function(target) {
+  var desired = target.sub(this.position);
+  desired = desired.normalise();
+  desired = desired.mul(new Vector(this.parent.maxVelocity, this.parent.maxVelocity));
+
+  var steer = desired.sub(this.velocity);
+  steer = steer.limit(this.parent.maxForce);
+  return steer;
+}
+
+Boid.prototype.applyForce = function(force) {
+  //TODO: add mass (A = F / M)
+  this.acceleration = this.acceleration.add(force);
+}
+
+
+// BOIDS CANVAS CLASS
 var BoidsCanvas = function(canvas, options) {
   this.canvasDiv = canvas;
   this.canvasDiv.size = {
@@ -121,7 +209,9 @@ var BoidsCanvas = function(canvas, options) {
   };
 
   this.maxVelocity = 3;
-  this.visibleRadius = 50;
+  this.visibleRadius = 100;
+  this.maxForce = 0.04;
+  this.separationDist = 80;
 
   this.init();
 }
@@ -176,14 +266,12 @@ BoidsCanvas.prototype.init = function() {
   // Initialise boids
   this.boids = [];
   for(var i = 0; i < this.canvas.width * this.canvas.height / this.options.density; i++) {
-    var position = {};
-    position.x = Math.floor(Math.random()*(this.canvas.width+1));
-    position.y = Math.floor(Math.random()*(this.canvas.height+1));
-    var velocity = {};
+    var position = new Vector(Math.floor(Math.random()*(this.canvas.width+1)),
+                              Math.floor(Math.random()*(this.canvas.height+1)));
     var max_velocity = 5;
     var min_velocity = -5;
-    velocity.x = Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity);
-    velocity.y = Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity);
+    var velocity = new Vector(Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity),
+                              Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity));
     this.boids.push(new Boid(this, position, velocity, "#ff3333"));
   }
 
