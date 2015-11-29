@@ -229,7 +229,8 @@ var BoidsCanvas = function(canvas, options) {
     density: this.setDensity(options.density),
     speed: this.setSpeed(options.speed),
     interactive: (options.interactive !== undefined) ? options.interactive : true,
-    mixedSizes: (options.mixedSizes !== undefined) ? options.mixedSizes : true
+    mixedSizes: (options.mixedSizes !== undefined) ? options.mixedSizes : true,
+    boidColours: (options.boidColours !== undefined && options.boidColours.length != 0) ? options.boidColours : ["#ff3333"]
   };
 
   // Internal boids parameters
@@ -298,7 +299,8 @@ BoidsCanvas.prototype.init = function() {
     var velocity = new Vector(Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity),
                               Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity));
     var size = (this.options.mixedSizes) ? Math.floor(Math.random()*(3-1+1)+1) : 1;
-    this.boids.push(new Boid(this, position, velocity, size, "#ff3333"));
+    var colourIdx = Math.floor(Math.random()*(this.options.boidColours.length-1+1));
+    this.boids.push(new Boid(this, position, velocity, size, this.options.boidColours[colourIdx]));
   }
 
   // Mouse event listeners
