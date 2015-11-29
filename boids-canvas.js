@@ -69,14 +69,19 @@ Boid.prototype.update = function () {
   var v1 = this.cohesion();
   var v2 = this.separation();
   var v3 = this.alignment();
+  var v4 = this.interactivity();
+
+  // Weight rules to get best behaviour
+  v1 = v1.mul(new Vector(1, 1));
+  v2 = v2.mul(new Vector(1.3, 1.3));
+  v3 = v3.mul(new Vector(1, 1));
+  v4 = v4.mul(new Vector(1.5, 1.5));
 
   this.applyForce(v1);
   this.applyForce(v2);
   this.applyForce(v3);
-  if(this.parent.options.interactive && this.parent.mousePos !== undefined) {
-    var v4 = this.seek(this.parent.mousePos);
-    this.applyForce(v4);
-  }
+  this.applyForce(v4);
+
   this.velocity = this.velocity.add(this.acceleration);
   this.velocity = this.velocity.limit(this.parent.options.speed);
 
@@ -172,6 +177,15 @@ Boid.prototype.alignment = function () {
   }
 }
 
+Boid.prototype.interactivity = function () {
+  if(this.parent.options.interactive && this.parent.mousePos !== undefined &&
+     this.position.dist(this.parent.mousePos) < this.parent.visibleRadius) {
+    return this.seek(this.parent.mousePos);
+  } else {
+    return new Vector(0, 0);
+  }
+}
+
 // Implement torus boundaries
 Boid.prototype.borders = function() {
   if(this.position.x < 0) this.position.x = this.parent.canvas.width;
@@ -216,8 +230,8 @@ var BoidsCanvas = function(canvas, options) {
     interactive: (options.interactive !== undefined) ? options.interactive : true
   };
 
-  this.visibleRadius = 100;
-  this.maxForce = 0.04;
+  this.visibleRadius = 150;
+  this.maxForce = 0.03;
   this.separationDist = 80;
 
   this.init();
