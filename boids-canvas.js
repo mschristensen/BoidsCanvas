@@ -60,7 +60,7 @@ Boid.prototype.draw = function () {
   this.parent.ctx.beginPath();
   this.parent.ctx.fillStyle = this.colour;
   this.parent.ctx.globalAlpha = 0.7;
-  this.parent.ctx.arc(this.position.x, this.position.y, 5 * this.size, 0, 2 * Math.PI);
+  this.parent.ctx.arc(this.position.x, this.position.y, this.parent.boidRadius * this.size, 0, 2 * Math.PI);
   this.parent.ctx.fill();
 };
 
@@ -74,7 +74,7 @@ Boid.prototype.update = function () {
 
   // Weight rules to get best behaviour
   v1 = v1.mul(new Vector(1, 1));
-  v2 = v2.mul(new Vector(1.3, 1.3));
+  v2 = v2.mul(new Vector(1.5, 1.5));
   v3 = v3.mul(new Vector(1, 1));
   v4 = v4.mul(new Vector(1.5, 1.5));
 
@@ -125,7 +125,7 @@ Boid.prototype.separation = function () {
   // For each boid which is too close, calculate a vector pointing
   // away from it weighted by the distance to it
   for(var i = 0; i < this.parent.boids.length; i++) {
-    var d = this.position.dist(this.parent.boids[i].position);
+    var d = this.position.dist(this.parent.boids[i].position) - (this.size * this.parent.boidRadius);
     if(d > 0 && d < this.parent.separationDist) {
       var diff = this.position.sub(this.parent.boids[i].position);
       diff = diff.normalise();
@@ -236,6 +236,7 @@ var BoidsCanvas = function(canvas, options) {
   this.visibleRadius = 150;
   this.maxForce = 0.03;
   this.separationDist = 80;
+  this.boidRadius = 5;  //size of the smallest boid
 
   this.init();
 }
