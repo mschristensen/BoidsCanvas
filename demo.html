@@ -16,11 +16,12 @@
     <script type="text/javascript">
       var canvasDiv = document.getElementById('boids-canvas');
       var options = {
-        background: '#333333',
-        //density: 'high',
-        //speed: 'fast'
-        //interactive: true
-        mixedSizes: false
+        background: '#ecf0f1',
+        density: 'medium',
+        speed: 'medium',
+        interactive: true,
+        mixedSizes: true,
+        boidColours: ["#34495e", "#e74c3c", '#2ecc71', '#9b59b6', '#f1c40f', '#1abc9c']
       };
       var boidsCanvas = new BoidsCanvas(canvasDiv, options);
     </script>
