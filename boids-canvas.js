@@ -39,7 +39,7 @@ Vector.prototype.limit = function(limit) {
 }
 
 // INDIVIDUAL BOID CLASS
-var Boid = function(parent, position, velocity, colour) {
+var Boid = function(parent, position, velocity, size, colour) {
   // Initialise the boid parameters
   this.position = new Vector(position.x, position.y);
   this.velocity = new Vector(velocity.x, velocity.y);
@@ -50,6 +50,7 @@ var Boid = function(parent, position, velocity, colour) {
     console.error('Please specify a valid boid hexadecimal color');
     return false;
   }
+  this.size = size;
   this.colour = colour;
   this.parent = parent;
 }
@@ -59,7 +60,7 @@ Boid.prototype.draw = function () {
   this.parent.ctx.beginPath();
   this.parent.ctx.fillStyle = this.colour;
   this.parent.ctx.globalAlpha = 0.7;
-  this.parent.ctx.arc(this.position.x, this.position.y, 5, 0, 2 * Math.PI);
+  this.parent.ctx.arc(this.position.x, this.position.y, 5 * this.size, 0, 2 * Math.PI);
   this.parent.ctx.fill();
 };
 
@@ -221,15 +222,17 @@ var BoidsCanvas = function(canvas, options) {
     'height': this.canvasDiv.offsetHeight
   };
 
-  // Set options
+  // Set customisable boids parameters
   options = options !== undefined ? options : {};
   this.options = {
     background: (options.background !== undefined) ? options.background : '#1a252f',
     density: this.setDensity(options.density),
     speed: this.setSpeed(options.speed),
-    interactive: (options.interactive !== undefined) ? options.interactive : true
+    interactive: (options.interactive !== undefined) ? options.interactive : true,
+    mixedSizes: (options.mixedSizes !== undefined) ? options.mixedSizes : true
   };
 
+  // Internal boids parameters
   this.visibleRadius = 150;
   this.maxForce = 0.03;
   this.separationDist = 80;
@@ -293,7 +296,8 @@ BoidsCanvas.prototype.init = function() {
     var min_velocity = -5;
     var velocity = new Vector(Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity),
                               Math.floor(Math.random()*(max_velocity-min_velocity+1)+min_velocity));
-    this.boids.push(new Boid(this, position, velocity, "#ff3333"));
+    var size = (this.options.mixedSizes) ? Math.floor(Math.random()*(3-1+1)+1) : 1;
+    this.boids.push(new Boid(this, position, velocity, size, "#ff3333"));
   }
 
   // Mouse event listeners
