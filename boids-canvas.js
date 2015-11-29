@@ -76,7 +76,7 @@ Boid.prototype.update = function () {
   v1 = v1.mul(new Vector(1, 1));
   v2 = v2.mul(new Vector(1.5, 1.5));
   v3 = v3.mul(new Vector(1, 1));
-  v4 = v4.mul(new Vector(1.5, 1.5));
+  v4 = v4.mul(new Vector(1.8, 1.8));
 
   this.applyForce(v1);
   this.applyForce(v2);
@@ -207,12 +207,11 @@ Boid.prototype.seek = function(target) {
   return steer;
 }
 
-// Adjust the acceleration by applying a force
+// Adjust the acceleration by applying a force, using A = F / M
+// with M = boid size so that larger boids have more inertia
 Boid.prototype.applyForce = function(force) {
-  //TODO: add mass (A = F / M)
-  this.acceleration = this.acceleration.add(force);
+  this.acceleration = this.acceleration.add(force.div(new Vector(this.size, this.size)));
 }
-
 
 // BOIDS CANVAS CLASS
 var BoidsCanvas = function(canvas, options) {
@@ -235,7 +234,7 @@ var BoidsCanvas = function(canvas, options) {
 
   // Internal boids parameters
   this.visibleRadius = 150;
-  this.maxForce = 0.03;
+  this.maxForce = 0.04;
   this.separationDist = 80;
   this.boidRadius = 5;  //size of the smallest boid
 
