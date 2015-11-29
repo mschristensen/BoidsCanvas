@@ -73,7 +73,7 @@ Boid.prototype.update = function () {
   this.applyForce(v1);
   this.applyForce(v2);
   this.applyForce(v3);
-  this.velocity = this.velocity.add(this.acceleration).limit(this.parent.maxVelocity);
+  this.velocity = this.velocity.add(this.acceleration).limit(this.parent.options.speed);
 
   this.position = this.position.add(this.velocity);
   this.acceleration = this.acceleration.mul(new Vector(0, 0));
@@ -131,7 +131,7 @@ Boid.prototype.separation = function () {
   // Steering = Desired - Velocity
   if(steer.mag() > 0) {
     steer = steer.normalise();
-    steer = steer.mul(new Vector(this.parent.maxVelocity, this.parent.maxVelocity));
+    steer = steer.mul(new Vector(this.parent.options.speed, this.parent.options.speed));
     steer = steer.sub(this.velocity);
     steer = steer.limit(this.parent.maxForce);
   }
@@ -156,7 +156,7 @@ Boid.prototype.alignment = function () {
     // Calculate average and limit
     sum = sum.div(new Vector(count, count));
     sum = sum.normalise();
-    sum = sum.mul(new Vector(this.parent.maxVelocity, this.parent.maxVelocity));
+    sum = sum.mul(new Vector(this.parent.options.speed, this.parent.options.speed));
 
     // Steering = Desired - Velocity
     var steer = sum.sub(this.velocity);
@@ -180,7 +180,7 @@ Boid.prototype.borders = function() {
 Boid.prototype.seek = function(target) {
   var desired = target.sub(this.position);
   desired = desired.normalise();
-  desired = desired.mul(new Vector(this.parent.maxVelocity, this.parent.maxVelocity));
+  desired = desired.mul(new Vector(this.parent.options.speed, this.parent.options.speed));
 
   var steer = desired.sub(this.velocity);
   steer = steer.limit(this.parent.maxForce);
@@ -205,10 +205,10 @@ var BoidsCanvas = function(canvas, options) {
   options = options !== undefined ? options : {};
   this.options = {
     background: (options.background !== undefined) ? options.background : '#1a252f',
-    density: this.setDensity(options.density)
+    density: this.setDensity(options.density),
+    speed: this.setSpeed(options.speed)
   };
 
-  this.maxVelocity = 3;
   this.visibleRadius = 100;
   this.maxForce = 0.04;
   this.separationDist = 80;
@@ -294,6 +294,17 @@ BoidsCanvas.prototype.update = function() {
 
   // Request next frame
   requestAnimationFrame(this.update.bind(this));
+}
+
+// Helper method to set density multiplier
+BoidsCanvas.prototype.setSpeed = function (speed) {
+  if (speed === 'fast') {
+    return 3;
+  }
+  else if (speed === 'slow') {
+    return 1;
+  }
+  return 2;
 }
 
 // Helper method to set density multiplier
