@@ -73,7 +73,12 @@ Boid.prototype.update = function () {
   this.applyForce(v1);
   this.applyForce(v2);
   this.applyForce(v3);
-  this.velocity = this.velocity.add(this.acceleration).limit(this.parent.options.speed);
+  if(this.parent.options.interactive && this.parent.mousePos !== undefined) {
+    var v4 = this.seek(this.parent.mousePos);
+    this.applyForce(v4);
+  }
+  this.velocity = this.velocity.add(this.acceleration);
+  this.velocity = this.velocity.limit(this.parent.options.speed);
 
   this.position = this.position.add(this.velocity);
   this.acceleration = this.acceleration.mul(new Vector(0, 0));
@@ -187,6 +192,7 @@ Boid.prototype.seek = function(target) {
   return steer;
 }
 
+// Adjust the acceleration by applying a force
 Boid.prototype.applyForce = function(force) {
   //TODO: add mass (A = F / M)
   this.acceleration = this.acceleration.add(force);
@@ -206,7 +212,8 @@ var BoidsCanvas = function(canvas, options) {
   this.options = {
     background: (options.background !== undefined) ? options.background : '#1a252f',
     density: this.setDensity(options.density),
-    speed: this.setSpeed(options.speed)
+    speed: this.setSpeed(options.speed),
+    interactive: (options.interactive !== undefined) ? options.interactive : true
   };
 
   this.visibleRadius = 100;
@@ -275,7 +282,14 @@ BoidsCanvas.prototype.init = function() {
     this.boids.push(new Boid(this, position, velocity, "#ff3333"));
   }
 
-  //TODO: add mouse event listeners
+  // Mouse event listeners
+  this.canvas.addEventListener('mousemove', function (e) {
+    this.mousePos = new Vector(e.clientX - this.canvas.offsetLeft,
+                               e.clientY - this.canvas.offsetTop);
+  }.bind(this));
+  this.canvas.addEventListener('mouseleave', function (e) {
+    this.mousePos = undefined;
+  }.bind(this));
 
   // Update canvas
   requestAnimationFrame(this.update.bind(this));
