@@ -38,4 +38,9 @@ var canvasDiv = document.getElementById('boids-canvas');
 
 ## Options
 
-TODO: describe options
+* `background`: specify a hexadecimal colour (as a string) or an image path
+* `density`:  can take values `low`, `medium` or `high`. Defaults to `medium`.
+* `speed`: can take values `slow`, `medium` or `fast`. Defaults to `medium`.
+* `interactive`: can take values `true` or `false`. When true, boids will be attracted to the mouse pointer. Defaults to `true`.
+* `mixedSizes`: can take values `true` or `false`. When true, boids will be of varying sizes - larger boids even have more inertia. Defaults to `true`.
+* `boidColours`: an array of hexadecimal colours (as strings) specifying the colours boids can take (assigned randomly). Defaults to all boids `#ff3333`
