@@ -1,0 +1,24 @@
+{
+  "name": "boids-canvas",
+  "homepage": "https://github.com/MikeC1995/BoidsCanvas",
+  "authors": [
+    "Mike Christensen <mike_christensen@btinternet.com>"
+  ],
+  "description": "A sexy looking Canvas and Javascript implementation of Craig Reynold's boids algorithm for flocking behaviour.",
+  "main": "boids-canvas.js",
+  "moduleType": [],
+  "keywords": [
+    "canvas",
+    "boids",
+    "reynold",
+    "animation",
+    "flocking"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "Gruntfile.js",
+    "*.json"
+  ]
+}
