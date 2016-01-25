@@ -1,4 +1,8 @@
 # BoidsCanvas
+[![NPM version](https://img.shields.io/npm/v/boids-canvas.svg)](https://www.npmjs.com/package/boids-canvas)
+[![Bower version](https://img.shields.io/bower/v/boids-canvas.svg)](https://github.com/MikeC1995/BoidsCanvas)
+[![NPM dependencies](https://david-dm.org/MikeC1995/BoidsCanvas.svg)](https://david-dm.org/MikeC1995/BoidsCanvas)
+[![NPM devDependencies](https://david-dm.org/MikeC1995/BoidsCanvas/dev-status.svg)](https://david-dm.org/MikeC1995/BoidsCanvas#info=devDependencies)
 
 ## Overview
 
@@ -10,7 +14,7 @@ Go ahead and fork the repo and open `demo.html` to give it a go!
 
 ## Usage
 
-Clone the repository to get started. Use this animation on your webpage simply by:
+This plugin is available as `boids-canvas` on NPM and Bower. Alternatively, you can clone this repository. Use this animation on your webpage simply by:
 
 ```html
 <body>
