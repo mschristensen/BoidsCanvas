@@ -4,30 +4,30 @@ var Vector = function(x, y) {
   if(y === 'undefined') y = 0;
   this.x = x;
   this.y = y;
-}
+};
 
 Vector.prototype.add = function(v) {
   return new Vector(this.x + v.x, this.y + v.y);
-}
+};
 Vector.prototype.sub = function(v) {
   return new Vector(this.x - v.x, this.y - v.y);
-}
+};
 Vector.prototype.mul = function(v) {
   return new Vector(this.x * v.x, this.y * v.y);
-}
+};
 Vector.prototype.div = function(v) {
   return new Vector(this.x / v.x, this.y / v.y);
-}
+};
 Vector.prototype.mag = function() {
   return Math.sqrt((this.x * this.x) + (this.y * this.y));
-}
+};
 Vector.prototype.normalise = function(v) {
   var mag = this.mag();
   return new Vector(this.x / mag, this.y / mag);
-}
+};
 Vector.prototype.dist = function(v) {
   return Math.sqrt((this.x - v.x)*(this.x - v.x) + (this.y - v.y)*(this.y - v.y));
-}
+};
 Vector.prototype.limit = function(limit) {
   var v;
   if(this.mag() > limit) {
@@ -36,7 +36,7 @@ Vector.prototype.limit = function(limit) {
     v = this;
   }
   return v;
-}
+};
 
 // INDIVIDUAL BOID CLASS
 var Boid = function(parent, position, velocity, size, colour) {
@@ -53,7 +53,7 @@ var Boid = function(parent, position, velocity, size, colour) {
   this.size = size;
   this.colour = colour;
   this.parent = parent;
-}
+};
 
 Boid.prototype.draw = function () {
   // Draw boid
@@ -89,7 +89,7 @@ Boid.prototype.update = function () {
   this.position = this.position.add(this.velocity);
   this.acceleration = this.acceleration.mul(new Vector(0, 0));
   this.borders();
-}
+};
 
 // BOIDS FLOCKING RULES
 
@@ -115,7 +115,7 @@ Boid.prototype.cohesion = function () {
   } else {
     return new Vector(0, 0);
   }
-}
+};
 
 /* Separation rule: steer to avoid crowding local flockmates */
 Boid.prototype.separation = function () {
@@ -147,7 +147,7 @@ Boid.prototype.separation = function () {
     steer = steer.limit(this.parent.maxForce);
   }
   return steer;
-}
+};
 
 /* Alignment rule: steer toward average heading of local flockmates */
 Boid.prototype.alignment = function () {
@@ -176,7 +176,7 @@ Boid.prototype.alignment = function () {
   } else {
     return new Vector(0, 0);
   }
-}
+};
 
 Boid.prototype.interactivity = function () {
   if(this.parent.options.interactive && this.parent.mousePos !== undefined &&
@@ -185,7 +185,7 @@ Boid.prototype.interactivity = function () {
   } else {
     return new Vector(0, 0);
   }
-}
+};
 
 // Implement torus boundaries
 Boid.prototype.borders = function() {
@@ -193,7 +193,7 @@ Boid.prototype.borders = function() {
   if(this.position.y < 0) this.position.y = this.parent.canvas.height;
   if(this.position.x > this.parent.canvas.width) this.position.x = 0;
   if(this.position.y > this.parent.canvas.height) this.position.y = 0;
-}
+};
 
 /* Calculate a force to apply to a boid to steer
 ** it towards a target position */
@@ -205,13 +205,13 @@ Boid.prototype.seek = function(target) {
   var steer = desired.sub(this.velocity);
   steer = steer.limit(this.parent.maxForce);
   return steer;
-}
+};
 
 // Adjust the acceleration by applying a force, using A = F / M
 // with M = boid size so that larger boids have more inertia
 Boid.prototype.applyForce = function(force) {
   this.acceleration = this.acceleration.add(force.div(new Vector(this.size, this.size)));
-}
+};
 
 // BOIDS CANVAS CLASS
 var BoidsCanvas = function(canvas, options) {
@@ -229,7 +229,7 @@ var BoidsCanvas = function(canvas, options) {
     speed: this.setSpeed(options.speed),
     interactive: (options.interactive !== undefined) ? options.interactive : true,
     mixedSizes: (options.mixedSizes !== undefined) ? options.mixedSizes : true,
-    boidColours: (options.boidColours !== undefined && options.boidColours.length != 0) ? options.boidColours : ["#ff3333"]
+    boidColours: (options.boidColours !== undefined && options.boidColours.length !== 0) ? options.boidColours : ["#ff3333"]
   };
 
   // Internal boids parameters
@@ -239,7 +239,7 @@ var BoidsCanvas = function(canvas, options) {
   this.boidRadius = 5;  //size of the smallest boid
 
   this.init();
-}
+};
 
 BoidsCanvas.prototype.init = function() {
 
@@ -313,7 +313,7 @@ BoidsCanvas.prototype.init = function() {
 
   // Update canvas
   requestAnimationFrame(this.update.bind(this));
-}
+};
 
 // Initialise boids according to options
 BoidsCanvas.prototype.initialiseBoids = function() {
@@ -329,7 +329,7 @@ BoidsCanvas.prototype.initialiseBoids = function() {
     var colourIdx = Math.floor(Math.random()*(this.options.boidColours.length-1+1));
     this.boids.push(new Boid(this, position, velocity, size, this.options.boidColours[colourIdx]));
   }
-}
+};
 
 BoidsCanvas.prototype.update = function() {
   // Clear canvas
@@ -344,7 +344,7 @@ BoidsCanvas.prototype.update = function() {
 
   // Request next frame
   requestAnimationFrame(this.update.bind(this));
-}
+};
 
 // Helper method to set density multiplier
 BoidsCanvas.prototype.setSpeed = function (speed) {
@@ -355,7 +355,7 @@ BoidsCanvas.prototype.setSpeed = function (speed) {
     return 1;
   }
   return 2;
-}
+};
 
 // Helper method to set density multiplier
 BoidsCanvas.prototype.setDensity = function (density) {
@@ -366,11 +366,11 @@ BoidsCanvas.prototype.setDensity = function (density) {
     return 20000;
   }
   return 10000;
-}
+};
 
 // Helper method to set multiple styles
 BoidsCanvas.prototype.setStyles = function (div, styles) {
   for (var property in styles) {
     div.style[property] = styles[property];
   }
-}
+};
