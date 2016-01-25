@@ -1,6 +1,6 @@
 {
   "name": "boids-canvas",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A sexy looking Canvas and Javascript implementation of Craig Reynold's boids algorithm for flocking behaviour.",
   "author": "Mike Christensen <mike_christensen@btinternet.com>",
   "main": "boids-canvas.js",
