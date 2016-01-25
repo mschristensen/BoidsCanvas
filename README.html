@@ -1,0 +1,35 @@
+<h1 id="boidscanvas">BoidsCanvas</h1>
+<h2 id="overview">Overview</h2>
+<p>A sexy looking HTML5 and Javascript implementation of Craig Reynold&#39;s boids algorithm for flocking behaviour. Fully plug n&#39; play, modular and customisable.</p>
+<p><a href="http://codepen.io/MikeC1995/pen/RWXoOe">See it live on CodePen</a></p>
+<p>Go ahead and fork the repo and open <code>demo.html</code> to give it a go!</p>
+<h2 id="usage">Usage</h2>
+<p>This plugin is available as <code>boids-canvas</code> on NPM and Bower. Alternatively, you can clone this repository. Use this animation on your webpage simply by:</p>
+<pre><code class="lang-html">&lt;body&gt;
+  &lt;div id=&quot;boids-canvas&quot;&gt;&lt;/div&gt;
+  &lt;script type=&quot;text/javascript&quot; src=&quot;boids-canvas.js&quot;&gt;&lt;/script&gt;
+  &lt;script type=&quot;text/javascript&quot;&gt;
+    var boidsCanvas = new BoidsCanvas(canvasDiv, options);
+  &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<p>A number of options are supported:</p>
+<pre><code class="lang-js">var options = {
+  background: &#39;#ecf0f1&#39;,
+  density: &#39;medium&#39;,
+  speed: &#39;medium&#39;,
+  interactive: true,
+  mixedSizes: true,
+  boidColours: [&quot;#34495e&quot;, &quot;#e74c3c&quot;, &#39;#2ecc71&#39;, &#39;#9b59b6&#39;, &#39;#f1c40f&#39;, &#39;#1abc9c&#39;]
+};
+var canvasDiv = document.getElementById(&#39;boids-canvas&#39;);
+</code></pre>
+<h2 id="options">Options</h2>
+<ul>
+<li><code>background</code>: specify a hexadecimal colour (as a string) or an image path</li>
+<li><code>density</code>:  can take values <code>low</code>, <code>medium</code> or <code>high</code>. Defaults to <code>medium</code>.</li>
+<li><code>speed</code>: can take values <code>slow</code>, <code>medium</code> or <code>fast</code>. Defaults to <code>medium</code>.</li>
+<li><code>interactive</code>: can take values <code>true</code> or <code>false</code>. When true, boids will be attracted to the mouse pointer. Defaults to <code>true</code>.</li>
+<li><code>mixedSizes</code>: can take values <code>true</code> or <code>false</code>. When true, boids will be of varying sizes - larger boids even have more inertia. Defaults to <code>true</code>.</li>
+<li><code>boidColours</code>: an array of hexadecimal colours (as strings) specifying the colours boids can take (assigned randomly). Defaults to all boids <code>#ff3333</code></li>
+</ul>
